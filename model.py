@@ -16,10 +16,10 @@ from typing import Tuple, Dict, List
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
 
-# ======================== 数据集定义 ========================
+# ======================== Dataset Definition ========================
 
 class CoralBleachingDataset(Dataset):
-    """珊瑚白化检测数据集"""
+    """Coral bleaching detection dataset"""
     
     def __init__(self, 
                  image_dir: str,
@@ -30,12 +30,12 @@ class CoralBleachingDataset(Dataset):
                  mode='train'):
         """
         Args:
-            image_dir: 原始图像目录
-            bleached_mask_dir: 白化珊瑚掩码目录
-            non_bleached_mask_dir: 非白化珊瑚掩码目录
-            image_ids: 图像ID列表
-            transform: 数据增强
-            mode: 'train' 或 'val'
+            image_dir: Original image directory
+            bleached_mask_dir: Bleached coral mask directory
+            non_bleached_mask_dir: Non-bleached coral mask directory
+            image_ids: List of image IDs
+            transform: Data augmentation
+            mode: 'train' or 'val'
         """
         self.image_dir = image_dir
         self.bleached_mask_dir = bleached_mask_dir
@@ -50,7 +50,7 @@ class CoralBleachingDataset(Dataset):
     def __getitem__(self, idx):
         img_id = self.image_ids[idx]
         
-        # 加载图像和掩码
+        # Load image and masks
         image_path = os.path.join(self.image_dir, f"{img_id}.jpg")
         bleached_mask_path = os.path.join(self.bleached_mask_dir, f"{img_id}_bleached.png")
         non_bleached_mask_path = os.path.join(self.non_bleached_mask_dir, f"{img_id}_non_bleached.png")
@@ -59,16 +59,16 @@ class CoralBleachingDataset(Dataset):
         bleached_mask = np.array(Image.open(bleached_mask_path).convert('L'))
         non_bleached_mask = np.array(Image.open(non_bleached_mask_path).convert('L'))
         
-        # 转换为二值掩码
+        # Convert to binary masks
         bleached_mask = (bleached_mask > 127).astype(np.float32)
         non_bleached_mask = (non_bleached_mask > 127).astype(np.float32)
         
-        # 创建3类分割掩码：背景(0)、健康珊瑚(1)、白化珊瑚(2)
+        # Create 3-class segmentation mask: background(0), healthy coral(1), bleached coral(2)
         segmentation_mask = np.zeros_like(bleached_mask, dtype=np.float32)
         segmentation_mask[non_bleached_mask == 1] = 1
         segmentation_mask[bleached_mask == 1] = 2
         
-        # 计算白化指标
+        # Calculate bleaching metrics
         total_coral_pixels = (bleached_mask == 1).sum() + (non_bleached_mask == 1).sum()
         if total_coral_pixels > 0:
             bleaching_ratio = (bleached_mask == 1).sum() / total_coral_pixels
@@ -77,18 +77,18 @@ class CoralBleachingDataset(Dataset):
             bleaching_ratio = 0.0
             coral_coverage = 0.0
         
-        # 数据增强
+        # Data augmentation
         if self.transform:
             transformed = self.transform(image=image, mask=segmentation_mask)
             image = transformed['image']
             segmentation_mask = transformed['mask']
-            # 确保mask是整数类型
+            # Ensure mask is integer type
             if isinstance(segmentation_mask, torch.Tensor):
                 segmentation_mask = segmentation_mask.long()
             else:
                 segmentation_mask = segmentation_mask.astype(np.int64)
         
-        # 转换为tensor
+        # Convert to tensor
         if not isinstance(image, torch.Tensor):
             image = torch.from_numpy(image).permute(2, 0, 1).float() / 255.0
         if not isinstance(segmentation_mask, torch.Tensor):
@@ -102,10 +102,10 @@ class CoralBleachingDataset(Dataset):
             'image_id': img_id
         }
 
-# ======================== 模型定义 ========================
+# ======================== Model Definition ========================
 
 class CoralBleachingBaseline(nn.Module):
-    """珊瑚白化检测基线模型"""
+    """Coral bleaching detection baseline model"""
     
     def __init__(self, 
                  backbone_name='efficientnet_b0',
@@ -113,30 +113,30 @@ class CoralBleachingBaseline(nn.Module):
                  pretrained=True):
         super().__init__()
         
-        # 使用timm库的预训练模型作为backbone
+        # Use timm library pretrained model as backbone
         self.backbone = timm.create_model(
             backbone_name,
             pretrained=pretrained,
             features_only=True,
-            out_indices=[1, 2, 3, 4]  # 获取多尺度特征
+            out_indices=[1, 2, 3, 4]  # Get multi-scale features
         )
         
-        # 获取特征通道数
+        # Get feature channels
         channels = self.backbone.feature_info.channels()
         
-        # 分割解码器（简化版U-Net）
+        # Segmentation decoder (simplified U-Net)
         self.decoder4 = self._make_decoder_block(channels[3], channels[2], 256)
         self.decoder3 = self._make_decoder_block(256 + channels[2], channels[1], 128)
         self.decoder2 = self._make_decoder_block(128 + channels[1], channels[0], 64)
         self.decoder1 = self._make_decoder_block(64 + channels[0], channels[0], 32)
         
-        # 分割头
+        # Segmentation head
         self.seg_head = nn.Conv2d(32, num_classes, kernel_size=1)
         
-        # 全局特征池化用于回归任务
+        # Global feature pooling for regression tasks
         self.global_pool = nn.AdaptiveAvgPool2d(1)
         
-        # 白化比例回归头
+        # Bleaching ratio regression head
         self.bleaching_head = nn.Sequential(
             nn.Linear(channels[3], 256),
             nn.ReLU(inplace=True),
@@ -145,16 +145,16 @@ class CoralBleachingBaseline(nn.Module):
             nn.ReLU(inplace=True),
             nn.Dropout(0.3),
             nn.Linear(128, 1),
-            nn.Sigmoid()  # 输出0-1之间的白化比例
+            nn.Sigmoid()  # Output bleaching ratio between 0-1
         )
         
-        # 珊瑚覆盖率回归头
+        # Coral coverage regression head
         self.coverage_head = nn.Sequential(
             nn.Linear(channels[3], 128),
             nn.ReLU(inplace=True),
             nn.Dropout(0.3),
             nn.Linear(128, 1),
-            nn.Sigmoid()  # 输出0-1之间的覆盖率
+            nn.Sigmoid()  # Output coverage between 0-1
         )
     
     def _make_decoder_block(self, in_channels, skip_channels, out_channels):
@@ -168,10 +168,10 @@ class CoralBleachingBaseline(nn.Module):
         )
     
     def forward(self, x):
-        # 编码器
+        # Encoder
         features = self.backbone(x)
         
-        # 分割解码器
+        # Segmentation decoder
         d4 = self.decoder4(features[3])
         d4_up = F.interpolate(d4, size=features[2].shape[2:], mode='bilinear', align_corners=False)
         d3 = self.decoder3(torch.cat([d4_up, features[2]], dim=1))
@@ -180,14 +180,14 @@ class CoralBleachingBaseline(nn.Module):
         d2_up = F.interpolate(d2, size=features[0].shape[2:], mode='bilinear', align_corners=False)
         d1 = self.decoder1(torch.cat([d2_up, features[0]], dim=1))
         
-        # 分割输出
+        # Segmentation output
         seg_logits = self.seg_head(d1)
         seg_output = F.interpolate(seg_logits, size=x.shape[2:], mode='bilinear', align_corners=False)
         
-        # 全局特征用于回归
+        # Global features for regression
         global_features = self.global_pool(features[3]).flatten(1)
         
-        # 白化比例和覆盖率预测
+        # Bleaching ratio and coverage prediction
         bleaching_ratio = self.bleaching_head(global_features)
         coral_coverage = self.coverage_head(global_features)
         
@@ -197,10 +197,10 @@ class CoralBleachingBaseline(nn.Module):
             'coral_coverage': coral_coverage.squeeze(1)
         }
 
-# ======================== 损失函数 ========================
+# ======================== Loss Function ========================
 
 class CombinedLoss(nn.Module):
-    """组合损失函数"""
+    """Combined loss function"""
     
     def __init__(self, 
                  seg_weight=1.0,
@@ -211,30 +211,30 @@ class CombinedLoss(nn.Module):
         self.bleaching_weight = bleaching_weight
         self.coverage_weight = coverage_weight
         
-        # 使用加权交叉熵处理类别不平衡
+        # Use weighted cross entropy to handle class imbalance
         self.seg_criterion = nn.CrossEntropyLoss(weight=torch.tensor([0.3, 1.0, 1.2]))
         self.regression_criterion = nn.MSELoss()
     
     def forward(self, outputs, targets):
-        # 分割损失
+        # Segmentation loss
         seg_loss = self.seg_criterion(
             outputs['segmentation'],
             targets['segmentation_mask']
         )
         
-        # 白化比例回归损失
+        # Bleaching ratio regression loss
         bleaching_loss = self.regression_criterion(
             outputs['bleaching_ratio'],
             targets['bleaching_ratio']
         )
         
-        # 覆盖率回归损失
+        # Coverage regression loss
         coverage_loss = self.regression_criterion(
             outputs['coral_coverage'],
             targets['coral_coverage']
         )
         
-        # 组合损失
+        # Combined loss
         total_loss = (self.seg_weight * seg_loss + 
                      self.bleaching_weight * bleaching_loss + 
                      self.coverage_weight * coverage_loss)
@@ -246,14 +246,14 @@ class CombinedLoss(nn.Module):
             'coverage_loss': coverage_loss
         }
 
-# ======================== 评估指标 ========================
+# ======================== Evaluation Metrics ========================
 
 class MetricCalculator:
-    """计算各种评估指标"""
+    """Calculate various evaluation metrics"""
     
     @staticmethod
     def calculate_iou(pred, target, num_classes=3):
-        """计算IoU (Intersection over Union)"""
+        """Calculate IoU (Intersection over Union)"""
         ious = []
         pred = pred.argmax(dim=1)
         
@@ -272,25 +272,25 @@ class MetricCalculator:
     
     @staticmethod
     def calculate_mae(pred, target):
-        """计算平均绝对误差"""
+        """Calculate Mean Absolute Error"""
         return torch.abs(pred - target).mean().item()
     
     @staticmethod
     def calculate_accuracy_threshold(pred, target, threshold=0.1):
-        """计算阈值内的准确率"""
+        """Calculate accuracy within threshold"""
         correct = (torch.abs(pred - target) < threshold).float()
         return correct.mean().item()
 
-# ======================== 训练和验证函数 ========================
+# ======================== Training and Validation Functions ========================
 
 def train_epoch(model, dataloader, criterion, optimizer, device):
-    """训练一个epoch"""
+    """Train one epoch"""
     model.train()
     running_losses = {'total_loss': 0, 'seg_loss': 0, 'bleaching_loss': 0, 'coverage_loss': 0}
     
     pbar = tqdm(dataloader, desc='Training')
     for batch in pbar:
-        # 准备数据
+        # Prepare data
         images = batch['image'].to(device)
         targets = {
             'segmentation_mask': batch['segmentation_mask'].to(device),
@@ -298,35 +298,35 @@ def train_epoch(model, dataloader, criterion, optimizer, device):
             'coral_coverage': batch['coral_coverage'].to(device)
         }
         
-        # 前向传播
+        # Forward pass
         optimizer.zero_grad()
         outputs = model(images)
         
-        # 计算损失
+        # Calculate loss
         losses = criterion(outputs, targets)
         
-        # 反向传播
+        # Backward pass
         losses['total_loss'].backward()
         optimizer.step()
         
-        # 更新统计
+        # Update statistics
         for key in running_losses:
             running_losses[key] += losses[key].item()
         
-        # 更新进度条
+        # Update progress bar
         pbar.set_postfix({
             'loss': f"{losses['total_loss'].item():.4f}",
             'bleaching': f"{losses['bleaching_loss'].item():.4f}"
         })
     
-    # 计算平均损失
+    # Calculate average losses
     for key in running_losses:
         running_losses[key] /= len(dataloader)
     
     return running_losses
 
 def validate_epoch(model, dataloader, criterion, device):
-    """验证一个epoch"""
+    """Validate one epoch"""
     model.eval()
     running_losses = {'total_loss': 0, 'seg_loss': 0, 'bleaching_loss': 0, 'coverage_loss': 0}
     metrics = {'iou': [], 'bleaching_mae': [], 'coverage_mae': [], 'bleaching_acc': []}
@@ -334,7 +334,7 @@ def validate_epoch(model, dataloader, criterion, device):
     with torch.no_grad():
         pbar = tqdm(dataloader, desc='Validation')
         for batch in pbar:
-            # 准备数据
+            # Prepare data
             images = batch['image'].to(device)
             targets = {
                 'segmentation_mask': batch['segmentation_mask'].to(device),
@@ -342,17 +342,17 @@ def validate_epoch(model, dataloader, criterion, device):
                 'coral_coverage': batch['coral_coverage'].to(device)
             }
             
-            # 前向传播
+            # Forward pass
             outputs = model(images)
             
-            # 计算损失
+            # Calculate loss
             losses = criterion(outputs, targets)
             
-            # 更新损失统计
+            # Update loss statistics
             for key in running_losses:
                 running_losses[key] += losses[key].item()
             
-            # 计算指标
+            # Calculate metrics
             iou = MetricCalculator.calculate_iou(outputs['segmentation'], targets['segmentation_mask'])
             bleaching_mae = MetricCalculator.calculate_mae(outputs['bleaching_ratio'], targets['bleaching_ratio'])
             coverage_mae = MetricCalculator.calculate_mae(outputs['coral_coverage'], targets['coral_coverage'])
@@ -367,7 +367,7 @@ def validate_epoch(model, dataloader, criterion, device):
             metrics['coverage_mae'].append(coverage_mae)
             metrics['bleaching_acc'].append(bleaching_acc)
     
-    # 计算平均值
+    # Calculate average values
     for key in running_losses:
         running_losses[key] /= len(dataloader)
     
@@ -376,10 +376,10 @@ def validate_epoch(model, dataloader, criterion, device):
     
     return running_losses, metrics
 
-# ======================== 数据增强 ========================
+# ======================== Data Augmentation ========================
 
 def get_transforms(mode='train', img_size=512):
-    """获取数据增强pipeline"""
+    """Get data augmentation pipeline"""
     
     if mode == 'train':
         return A.Compose([
@@ -408,21 +408,21 @@ def get_transforms(mode='train', img_size=512):
             ToTensorV2()
         ])
 
-# ======================== 主训练函数 ========================
+# ======================== Main Training Function ========================
 
 def train_model(config):
-    """完整的训练流程"""
+    """Complete training pipeline"""
     
-    # 设置设备
+    # Set device
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"Using device: {device}")
     
-    # 准备数据集
-    # 假设所有图像文件名格式一致
+    # Prepare dataset
+    # Assume all image filenames follow consistent format
     all_image_ids = [f.split('.')[0] for f in os.listdir(config['image_dir']) 
                      if f.endswith('.jpg')]
     
-    # 划分训练集和验证集
+    # Split training and validation sets
     train_ids, val_ids = train_test_split(
         all_image_ids, 
         test_size=0.2, 
@@ -432,7 +432,7 @@ def train_model(config):
     print(f"Training samples: {len(train_ids)}")
     print(f"Validation samples: {len(val_ids)}")
     
-    # 创建数据集
+    # Create datasets
     train_dataset = CoralBleachingDataset(
         config['image_dir'],
         config['bleached_mask_dir'],
@@ -451,7 +451,7 @@ def train_model(config):
         mode='val'
     )
     
-    # 创建数据加载器
+    # Create data loaders
     train_loader = DataLoader(
         train_dataset,
         batch_size=config['batch_size'],
@@ -468,35 +468,35 @@ def train_model(config):
         pin_memory=True
     )
     
-    # 创建模型
+    # Create model
     model = CoralBleachingBaseline(
         backbone_name=config['backbone'],
         num_classes=3,
         pretrained=True
     ).to(device)
     
-    # 损失函数
+    # Loss function
     criterion = CombinedLoss(
         seg_weight=config['seg_weight'],
         bleaching_weight=config['bleaching_weight'],
         coverage_weight=config['coverage_weight']
     ).to(device)
     
-    # 优化器
+    # Optimizer
     optimizer = torch.optim.AdamW(
         model.parameters(),
         lr=config['learning_rate'],
         weight_decay=config['weight_decay']
     )
     
-    # 学习率调度器
+    # Learning rate scheduler
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
         optimizer,
         T_max=config['num_epochs'],
         eta_min=config['learning_rate'] * 0.01
     )
     
-    # 训练历史
+    # Training history
     history = {
         'train_loss': [],
         'val_loss': [],
@@ -508,35 +508,35 @@ def train_model(config):
     best_val_loss = float('inf')
     best_model_state = None
     
-    # 训练循环
+    # Training loop
     for epoch in range(config['num_epochs']):
         print(f"\nEpoch {epoch+1}/{config['num_epochs']}")
         print("-" * 50)
         
-        # 训练
+        # Training
         train_losses = train_epoch(model, train_loader, criterion, optimizer, device)
         
-        # 验证
+        # Validation
         val_losses, val_metrics = validate_epoch(model, val_loader, criterion, device)
         
-        # 更新学习率
+        # Update learning rate
         scheduler.step()
         
-        # 记录历史
+        # Record history
         history['train_loss'].append(train_losses['total_loss'])
         history['val_loss'].append(val_losses['total_loss'])
         history['val_iou'].append(val_metrics['iou'])
         history['val_bleaching_mae'].append(val_metrics['bleaching_mae'])
         history['val_bleaching_acc'].append(val_metrics['bleaching_acc'])
         
-        # 打印结果
+        # Print results
         print(f"Train Loss: {train_losses['total_loss']:.4f}")
         print(f"Val Loss: {val_losses['total_loss']:.4f}")
         print(f"Val IoU: {val_metrics['iou']:.4f}")
         print(f"Val Bleaching MAE: {val_metrics['bleaching_mae']:.4f}")
         print(f"Val Bleaching Acc (±10%): {val_metrics['bleaching_acc']:.4f}")
         
-        # 保存最佳模型
+        # Save best model
         if val_losses['total_loss'] < best_val_loss:
             best_val_loss = val_losses['total_loss']
             best_model_state = model.state_dict().copy()
@@ -550,15 +550,15 @@ def train_model(config):
             }, 'best_coral_model.pth')
             print(f"✓ Saved best model (val_loss: {best_val_loss:.4f})")
     
-    # 加载最佳模型
+    # Load best model
     model.load_state_dict(best_model_state)
 
     return model, history, val_ids
 
-# ======================== 可视化函数 ========================
+# ======================== Visualization Functions ========================
 
 def visualize_predictions(model, dataset, device, num_samples=4):
-    """可视化模型预测结果"""
+    """Visualize model prediction results"""
     model.eval()
     
     fig, axes = plt.subplots(num_samples, 5, figsize=(20, 4*num_samples))
@@ -569,18 +569,18 @@ def visualize_predictions(model, dataset, device, num_samples=4):
         for idx, sample_idx in enumerate(indices):
             sample = dataset[sample_idx]
             
-            # 准备输入
+            # Prepare input
             image = sample['image'].unsqueeze(0).to(device)
             
-            # 预测
+            # Prediction
             outputs = model(image)
             
-            # 获取预测结果
+            # Get prediction results
             seg_pred = outputs['segmentation'].argmax(dim=1).cpu().squeeze()
             bleaching_ratio_pred = outputs['bleaching_ratio'].cpu().item()
             coverage_pred = outputs['coral_coverage'].cpu().item()
             
-            # 反归一化图像用于显示
+            # Denormalize image for display
             img_display = sample['image'].cpu()
             mean = torch.tensor([0.485, 0.456, 0.406]).view(3, 1, 1)
             std = torch.tensor([0.229, 0.224, 0.225]).view(3, 1, 1)
@@ -588,12 +588,12 @@ def visualize_predictions(model, dataset, device, num_samples=4):
             img_display = img_display.permute(1, 2, 0).numpy()
             img_display = np.clip(img_display, 0, 1)
             
-            # 真实标签
+            # True labels
             seg_true = sample['segmentation_mask'].cpu()
             bleaching_ratio_true = sample['bleaching_ratio'].item()
             coverage_true = sample['coral_coverage'].item()
             
-            # 绘制
+            # Plot
             axes[idx, 0].imshow(img_display)
             axes[idx, 0].set_title('Original Image')
             axes[idx, 0].axis('off')
@@ -606,15 +606,15 @@ def visualize_predictions(model, dataset, device, num_samples=4):
             axes[idx, 2].set_title('Predicted Segmentation')
             axes[idx, 2].axis('off')
             
-            # 创建白化可视化
+            # Create bleaching visualization
             bleaching_vis_true = np.zeros_like(seg_true)
-            bleaching_vis_true[seg_true == 2] = 1  # 白化区域
+            bleaching_vis_true[seg_true == 2] = 1  # Bleached areas
             axes[idx, 3].imshow(bleaching_vis_true, cmap='Reds', vmin=0, vmax=1)
             axes[idx, 3].set_title(f'True Bleaching\n(Ratio: {bleaching_ratio_true:.2%})')
             axes[idx, 3].axis('off')
             
             bleaching_vis_pred = np.zeros_like(seg_pred)
-            bleaching_vis_pred[seg_pred == 2] = 1  # 预测的白化区域
+            bleaching_vis_pred[seg_pred == 2] = 1  # Predicted bleached areas
             axes[idx, 4].imshow(bleaching_vis_pred, cmap='Reds', vmin=0, vmax=1)
             axes[idx, 4].set_title(f'Pred Bleaching\n(Ratio: {bleaching_ratio_pred:.2%})')
             axes[idx, 4].axis('off')
@@ -624,10 +624,10 @@ def visualize_predictions(model, dataset, device, num_samples=4):
     plt.show()
 
 def plot_training_history(history):
-    """绘制训练历史"""
+    """Plot training history"""
     fig, axes = plt.subplots(2, 2, figsize=(12, 10))
     
-    # 损失曲线
+    # Loss curves
     axes[0, 0].plot(history['train_loss'], label='Train Loss')
     axes[0, 0].plot(history['val_loss'], label='Val Loss')
     axes[0, 0].set_xlabel('Epoch')
@@ -636,7 +636,7 @@ def plot_training_history(history):
     axes[0, 0].legend()
     axes[0, 0].grid(True)
     
-    # IoU曲线
+    # IoU curve
     axes[0, 1].plot(history['val_iou'], label='Val IoU', color='green')
     axes[0, 1].set_xlabel('Epoch')
     axes[0, 1].set_ylabel('IoU')
@@ -644,7 +644,7 @@ def plot_training_history(history):
     axes[0, 1].legend()
     axes[0, 1].grid(True)
     
-    # 白化MAE曲线
+    # Bleaching MAE curve
     axes[1, 0].plot(history['val_bleaching_mae'], label='Bleaching MAE', color='orange')
     axes[1, 0].set_xlabel('Epoch')
     axes[1, 0].set_ylabel('MAE')
@@ -652,7 +652,7 @@ def plot_training_history(history):
     axes[1, 0].legend()
     axes[1, 0].grid(True)
     
-    # 白化准确率曲线
+    # Bleaching accuracy curve
     axes[1, 1].plot(history['val_bleaching_acc'], label='Bleaching Acc (±10%)', color='purple')
     axes[1, 1].set_xlabel('Epoch')
     axes[1, 1].set_ylabel('Accuracy')
@@ -664,53 +664,53 @@ def plot_training_history(history):
     plt.savefig('training_history.png', dpi=150)
     plt.show()
 
-# ======================== 主函数 ========================
+# ======================== Main Function ========================
 
 if __name__ == "__main__":
-    # 配置参数
+    # Configuration parameters
     config = {
-        # 数据路径
+        # Data paths
         'image_dir': 'data/images',
         'bleached_mask_dir': 'data/masks_bleached',
         'non_bleached_mask_dir': 'data/masks_non_bleached',
         
-        # 模型参数
-        'backbone': 'efficientnet_b0',  # 可选: efficientnet_b0-b7, resnet50等
+        # Model parameters
+        'backbone': 'efficientnet_b0',  # Options: efficientnet_b0-b7, resnet50, etc.
         'img_size': 512,
         
-        # 训练参数
+        # Training parameters
         'batch_size': 8,
         'num_epochs': 50,
         'learning_rate': 1e-4,
         'weight_decay': 1e-4,
         
-        # 损失权重
+        # Loss weights
         'seg_weight': 1.0,
         'bleaching_weight': 1.0,
         'coverage_weight': 0.5,
         
-        # 其他
+        # Others
         'num_workers': 4,
         'seed': 42
     }
     
-    # 设置随机种子
+    # Set random seed
     torch.manual_seed(config['seed'])
     np.random.seed(config['seed'])
     random.seed(config['seed'])
     
-    # 训练模型
+    # Train model
     model, history, val_ids = train_model(config)
     
-    # 绘制训练历史
+    # Plot training history
     plot_training_history(history)
     
-    # 可视化预测结果
+    # Visualize prediction results
     val_dataset = CoralBleachingDataset(
         config['image_dir'],
         config['bleached_mask_dir'], 
         config['non_bleached_mask_dir'],
-        val_ids,  # 需要从train_model函数中获取
+        val_ids,  # Need to get from train_model function
         transform=get_transforms('val', config['img_size'])
     )
     
