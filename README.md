@@ -56,25 +56,4 @@ We use **CodeCarbon** (industry-standard carbon tracking) and **THOP** (model ef
 3. **Model Efficiency**: FLOPs, parameters, latency
 4. **Break-Even Analysis**: When AI becomes carbon-positive vs traditional monitoring
 
-```bash
-# Install carbon tracking dependencies
-pip install codecarbon thop
-
-# Train with automatic carbon tracking
-python train_with_carbon_tracking.py
-
-# Generated reports:
-# - coral_bleaching_carbon_report.json       (raw emissions data)
-# - sle_environmental_impact_report.json     (structured analysis)
-# - sle_environmental_analysis.png           (visualizations)
-```
-
-Training Emissions: 0.1775 kg CO2eq
-Training Duration: 2.01 hours
-Model Parameters: 12.41M
-FLOPs: 6.13 GFLOPs
-
-Equivalent to:
-   Driving 0.8 km in a car
-   0.01 trees needed for 1 year to offset
-   22 smartphone charges
+See details in SLE folder

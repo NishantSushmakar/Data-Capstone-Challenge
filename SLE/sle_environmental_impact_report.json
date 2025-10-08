@@ -1,13 +1,13 @@
 {
   "question_1_computational_footprint": {
     "training_phase": {
-      "total_emissions_kg_co2eq": 0.1775331498759319,
-      "duration_hours": 2.01109860473209,
+      "total_emissions_kg_co2eq": 0.11930858696421755,
+      "duration_hours": 1.356041395664215,
       "equivalent_comparisons": {
-        "equivalent_km_driven": 0.8166524894292867,
-        "trees_year_to_offset": 0.008453959517901519,
-        "smartphone_charges": 22.19164373449149,
-        "days_of_human_breathing": 0.1775331498759319
+        "equivalent_km_driven": 0.5488195000354007,
+        "trees_year_to_offset": 0.00568136128401036,
+        "smartphone_charges": 14.913573370527192,
+        "days_of_human_breathing": 0.11930858696421755
       },
       "model_complexity": {
         "parameters_millions": 12.406077,
@@ -16,19 +16,19 @@
       }
     },
     "deployment_phase": {
-      "emissions_per_prediction_g": 2.317799613387785,
-      "latency_ms": 22.258238792419434,
-      "throughput_fps": 44.92718446081967
+      "emissions_per_prediction_g": 0.010714053483941614,
+      "latency_ms": 27.7864933013916,
+      "throughput_fps": 35.988708224291045
     }
   },
   "question_3_cost_benefit_analysis": {
-    "break_even_images": 3.7232583319661163,
-    "break_even_surveys": 0.003723258331966116,
-    "ai_training_cost_kg": 0.1775331498759319,
-    "ai_emissions_per_image_kg": 0.0023177996133877847,
+    "break_even_images": 2.3866831603049254,
+    "break_even_surveys": 0.0023866831603049253,
+    "ai_training_cost_kg": 0.11930858696421755,
+    "ai_emissions_per_image_kg": 1.0714053483941613e-05,
     "traditional_emissions_per_image_kg": 0.05,
-    "savings_per_image_kg": 0.047682200386612215,
-    "verdict": "Breaks even after 4 images (0.0 surveys)"
+    "savings_per_image_kg": 0.04998928594651606,
+    "verdict": "Breaks even after 2 images (0.0 surveys)"
   },
   "question_4_optimization_recommendations": []
 }

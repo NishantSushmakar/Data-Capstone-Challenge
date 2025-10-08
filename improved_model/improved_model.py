@@ -667,7 +667,8 @@ def train_improved_model(config):
     print(f"Using device: {device}")
     
     # Prepare dataset
-    all_image_ids = [f.split('.')[0] for f in os.listdir(config['image_dir']) if f.endswith('.jpg')]
+    all_image_ids = [f.split('.')[0] for f in os.listdir(config['image_dir'])
+                     if f.lower().endswith('.jpg')]
     
     # Split dataset with stratification
     train_ids, val_ids = train_test_split(
