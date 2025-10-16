@@ -2,7 +2,6 @@
 Modified Training Script with Carbon Tracking
 Integrates environmental cost monitoring into the existing coral bleaching model
 
-This version adds:
 1. Real-time carbon emission tracking during training
 2. Model efficiency metrics (FLOPs, params, latency)
 3. Inference cost measurement

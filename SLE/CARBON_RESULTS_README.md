@@ -53,9 +53,10 @@ Per 1000 images: 11 g CO₂ = 0.011 kg
 **Traditional Method** (assumed):
 
 ```
-Boat survey: ~50 kg CO₂ per survey
-Survey coverage: ~1,000 images
-Cost per image: 0.05 kg = 50 g CO₂
+Expert analysis speed: ~5 minutes per image
+Office computer power: 150W
+Energy consumption per image: 0.0125 kWh
+Emissions per image: ~5 g CO₂ (Dutch electricity grid 0.39 kg/kWh)
 ```
 
 **AI Method**:
@@ -67,25 +68,16 @@ Per image: 0.011 g CO₂
 
 **Benefits Timeline**:
 
-- Break-even after **2-3 images** ✅
-- After 1,000 images: Save **49.8 kg CO₂** (equivalent to 229 km driving)
-- After 10,000 images: Save **499 kg CO₂** (equivalent to 2,296 km driving)
+- Break-even after **24 images** ✅
+- After 1,000 images: Save **115 kg CO₂** 
 
 ------
 
 ### Question 3: When do costs outweigh benefits?
 
-**Answer**: AI becomes beneficial after just **2-3 images**.
+**Answer**: AI becomes beneficial after just **24 images**.
 
-**Break-Even Calculation**:
-
-```
-Training cost: 0.12 kg
-Savings per image: 50 g - 0.011 g = 49.989 g
-Break-even: 0.12 kg ÷ 0.049989 kg = 2.4 images
-```
-
-**Important Note**: This assumes traditional surveys cost 50 g CO₂ per image. You should discuss this assumption in your essay (see "Writing Tips" below).
+**Important Note**: This assumes traditional surveys cost 5 g CO₂ per image.
 
 **When AI is NOT justified**:
 

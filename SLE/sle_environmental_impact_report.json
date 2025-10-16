@@ -26,9 +26,9 @@
     "break_even_surveys": 0.0023866831603049253,
     "ai_training_cost_kg": 0.11930858696421755,
     "ai_emissions_per_image_kg": 1.0714053483941613e-05,
-    "traditional_emissions_per_image_kg": 0.05,
-    "savings_per_image_kg": 0.04998928594651606,
-    "verdict": "Breaks even after 2 images (0.0 surveys)"
+    "traditional_emissions_per_image_kg": 0.005,
+    "savings_per_image_kg": 0.004989294651605854,
+    "verdict": "Breaks even after 24 images"
   },
   "question_4_optimization_recommendations": []
 }
