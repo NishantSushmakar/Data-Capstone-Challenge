@@ -1,8 +1,14 @@
 """
+<<<<<<< HEAD
 Training Script with Carbon Tracking
 Integrates environmental cost monitoring into the existing coral bleaching model
 
 Key Features:
+=======
+Modified Training Script with Carbon Tracking
+Integrates environmental cost monitoring into the existing coral bleaching model
+
+>>>>>>> Multi-task
 1. Real-time carbon emission tracking during training
 2. Model efficiency metrics (FLOPs, params, latency)
 3. Inference cost measurement
@@ -34,9 +40,15 @@ def train_with_carbon_tracking(config):
         output_dir="./carbon_reports"
     )
     
+<<<<<<< HEAD
     # ==================== Prepare Dataset (FIXED: support .JPG) ====================
     all_image_ids = [f.split('.')[0] for f in os.listdir(config['image_dir'])
                      if f.lower().endswith('.jpg')]  # FIXED: Case-insensitive
+=======
+    # ==================== Prepare Dataset (same as before) ====================
+    all_image_ids = [f.split('.')[0] for f in os.listdir(config['image_dir']) 
+                     if f.endswith('.jpg')]
+>>>>>>> Multi-task
     
     train_ids, val_ids = train_test_split(
         all_image_ids, 
@@ -145,25 +157,38 @@ def train_with_carbon_tracking(config):
     # ==================== START CARBON TRACKING ====================
     carbon_tracker.start_training()
     
+<<<<<<< HEAD
     # ==================== Training Loop with Early Stopping ====================
     best_val_loss = float('inf')
     best_iou = 0.0
     epochs_without_improvement = 0
     patience = 10  # Stop if no improvement for 10 epochs
 
+=======
+    # ==================== Training Loop ====================
+    best_val_loss = float('inf')
+    best_iou = 0.0
+>>>>>>> Multi-task
     history = {
         'train_loss': [], 'val_loss': [],
         'val_iou': [],
         'val_bleaching_mae': [], 'val_bleaching_acc': []
     }
+<<<<<<< HEAD
 
     print(f"\nStarting training for up to {config['epochs']} epochs...")
     print(f"Early stopping patience: {patience} epochs\n")
 
+=======
+    
+    print(f"\nStarting training for {config['epochs']} epochs...\n")
+    
+>>>>>>> Multi-task
     for epoch in range(config['epochs']):
         print(f"{'='*60}")
         print(f"Epoch {epoch+1}/{config['epochs']}")
         print(f"{'='*60}")
+<<<<<<< HEAD
 
         # Train
         train_losses = train_epoch(model, train_loader, criterion, optimizer,
@@ -172,6 +197,16 @@ def train_with_carbon_tracking(config):
         # Validate
         val_losses, val_metrics = validate_epoch(model, val_loader, criterion, device)
 
+=======
+        
+        # Train
+        train_losses = train_epoch(model, train_loader, criterion, optimizer, 
+                                  device, scheduler)
+        
+        # Validate
+        val_losses, val_metrics = validate_epoch(model, val_loader, criterion, device)
+        
+>>>>>>> Multi-task
         # Update history
         history['train_loss'].append(train_losses['total_loss'])
         history['val_loss'].append(val_losses['total_loss'])
@@ -186,17 +221,25 @@ def train_with_carbon_tracking(config):
         print(f"  Val IoU:    {val_metrics['iou']:.4f}")
         print(f"  Bleach MAE: {val_metrics['bleaching_mae']:.4f}")
         print(f"  Bleach Acc: {val_metrics['bleaching_acc']:.4f}\n")
+<<<<<<< HEAD
 
         # Save best model and check early stopping
         if val_losses['total_loss'] < best_val_loss:
             best_val_loss = val_losses['total_loss']
             epochs_without_improvement = 0  # Reset counter
+=======
+        
+        # Save best model
+        if val_losses['total_loss'] < best_val_loss:
+            best_val_loss = val_losses['total_loss']
+>>>>>>> Multi-task
             torch.save({
                 'epoch': epoch,
                 'model_state_dict': model.state_dict(),
                 'optimizer_state_dict': optimizer.state_dict(),
                 'val_loss': best_val_loss,
                 'val_metrics': val_metrics,
+<<<<<<< HEAD
                 'config': config,
                 'history': history
             }, 'best_improved_model.pth')
@@ -205,6 +248,12 @@ def train_with_carbon_tracking(config):
             epochs_without_improvement += 1
             print(f"⚠️  No improvement for {epochs_without_improvement}/{patience} epochs")
 
+=======
+                'config': config
+            }, 'best_improved_model.pth')
+            print(f"[OK] Saved best model (val_loss: {best_val_loss:.4f})")
+        
+>>>>>>> Multi-task
         if val_metrics['iou'] > best_iou:
             best_iou = val_metrics['iou']
             torch.save({
@@ -212,6 +261,7 @@ def train_with_carbon_tracking(config):
                 'model_state_dict': model.state_dict(),
                 'val_iou': best_iou,
                 'val_metrics': val_metrics,
+<<<<<<< HEAD
                 'config': config,
                 'history': history
             }, 'best_iou_model.pth')
@@ -226,10 +276,16 @@ def train_with_carbon_tracking(config):
             print(f"Stopping at epoch {epoch+1}/{config['epochs']}")
             print(f"{'='*60}\n")
             break
+=======
+                'config': config
+            }, 'best_iou_model.pth')
+            print(f"[OK] Saved best IoU model (IoU: {best_iou:.4f})")
+>>>>>>> Multi-task
     
     # ==================== STOP CARBON TRACKING ====================
     training_emissions = carbon_tracker.stop_training()
     
+<<<<<<< HEAD
     # ==================== Inference Carbon Tracking (CORRECTED) ====================
     print("\n[SEARCH] Measuring inference carbon footprint with optimized dataloader...")
 
@@ -247,12 +303,22 @@ def train_with_carbon_tracking(config):
         dataloader=inference_loader,
         device=device,
         num_samples=min(1000, len(val_dataset))  # Test on up to 1000 images
+=======
+    # ==================== Inference Carbon Tracking ====================
+    print("\n[SEARCH] Measuring inference carbon footprint...")
+    inference_emissions = carbon_tracker.track_inference(
+        model=model,
+        dataloader=val_loader,
+        device=device,
+        num_samples=1000  # Test on 1000 images
+>>>>>>> Multi-task
     )
     
     # Save detailed carbon report
     carbon_report = carbon_tracker.save_detailed_report(
         filename="coral_bleaching_carbon_report.json"
     )
+<<<<<<< HEAD
 
     # ==================== Export Dataset Split ====================
     print("\n[FILE] Exporting dataset split information...")
@@ -272,6 +338,8 @@ def train_with_carbon_tracking(config):
     with open('dataset_split.json', 'w') as f:
         json.dump(dataset_split_export, f, indent=2)
     print("[OK] Dataset split saved to: dataset_split.json")
+=======
+>>>>>>> Multi-task
     
     # ==================== SLE Analysis ====================
     print("\n[CHART] Generating SLE environmental impact analysis...")
@@ -360,6 +428,7 @@ def train_with_carbon_tracking(config):
     visualize_improved_predictions(model, val_dataset, device, num_samples=6)
     
     print("\n[OK] All analyses complete! Files generated:")
+<<<<<<< HEAD
     print("    ✓ coral_bleaching_carbon_report.json - Detailed carbon emissions")
     print("    ✓ sle_environmental_impact_report.json - SLE essay data")
     print("    ✓ dataset_split.json - Train/val split for reproducibility")
@@ -445,17 +514,30 @@ Use the metrics from `sle_environmental_impact_report.json` to answer:
 
     print("\n[FILE] Usage guide saved to: CARBON_RESULTS_README.md")
 
+=======
+    print("    coral_bleaching_carbon_report.json")
+    print("    sle_environmental_impact_report.json")
+    print("    sle_environmental_analysis.png")
+    print("    improved_training_history.png")
+    print("    improved_predictions.png")
+    
+>>>>>>> Multi-task
     return model, history, val_ids, carbon_report, sle_report
 
 # ==================== Main Entry Point ====================
 
 if __name__ == "__main__":
+<<<<<<< HEAD
     # Optimized Configuration (based on training analysis)
+=======
+    # Configuration (same as before)
+>>>>>>> Multi-task
     config = {
         # Data paths
         'image_dir': 'data/images',
         'bleached_mask_dir': 'data/masks_bleached',
         'non_bleached_mask_dir': 'data/masks_non_bleached',
+<<<<<<< HEAD
 
         # Model
         'backbone': 'tf_efficientnet_b2_ns',
@@ -475,6 +557,27 @@ if __name__ == "__main__":
         'bleaching_weight': 3.0,  # Increased from 2.0 to improve bleaching prediction
         'coverage_weight': 0.8,
 
+=======
+        
+        # Model
+        'backbone': 'tf_efficientnet_b2_ns',
+        
+        # Training
+        'batch_size': 4,
+        'epochs': 60,
+        'lr': 3e-4,
+        'weight_decay': 1e-4,
+        'img_size': 512,
+        'num_workers': 4,
+        'seed': 42,
+        
+        # Loss weights
+        'seg_weight': 2.0,
+        'dice_weight': 1.5,
+        'bleaching_weight': 2.0,
+        'coverage_weight': 0.8,
+        
+>>>>>>> Multi-task
         # Data quality
         'filter_low_quality': True
     }

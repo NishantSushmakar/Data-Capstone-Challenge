@@ -1,0 +1,4 @@
+Architecture,Description,Params (M),FLOPs (G),Val IoU,Bleach Acc,Train CO2 (kg),Train Time (h),Infer CO2 (g)
+resnet34,ResNet-34 - Classic CNN baseline,27.98,22.97,0.5191,0.4367,0.1375,1.58,1.182034
+efficientnet_b0,EfficientNet-B0 - Lightweight baseline,8.57,4.65,0.5060,0.4867,0.1558,1.77,0.968266
+efficientnet_b2,EfficientNet-B2 - Your improved model,12.41,6.13,0.5715,0.5967,0.1200,1.40,1.096412

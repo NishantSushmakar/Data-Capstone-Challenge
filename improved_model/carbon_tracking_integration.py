@@ -4,16 +4,24 @@ Integrates CodeCarbon to quantify environmental costs for SLE analysis
 
 Key Metrics Tracked:
 1. Training phase carbon emissions (kg CO2eq)
+<<<<<<< HEAD
 2. Inference phase energy consumption (with proper warmup and batching)
+=======
+2. Inference phase energy consumption
+>>>>>>> Multi-task
 3. Model efficiency metrics (FLOPs, params, latency)
 4. Cost-benefit analysis framework
 
 Installation required:
+<<<<<<< HEAD
 pip install codecarbon thop
 
 USAGE:
 For complete workflow, use training_with_carbon_tracking.py which integrates
 all fixes and generates comprehensive SLE reports.
+=======
+pip install codecarbon
+>>>>>>> Multi-task
 """
 
 import torch
@@ -109,6 +117,7 @@ class CarbonAwareTrainer:
         return emissions
     
     def track_inference(self, model, dataloader, device, num_samples=None):
+<<<<<<< HEAD
         """
         Track emissions for inference/deployment simulation
 
@@ -167,10 +176,24 @@ class CarbonAwareTrainer:
         start_time = time.time()
 
         predictions = 0
+=======
+        """Track emissions for inference/deployment simulation"""
+        print(f"\n{'='*60}")
+        print(f"[EARTH] Tracking inference emissions")
+        print(f"{'='*60}\n")
+        
+        self.tracker.start()
+        start_time = time.time()
+        
+        model.eval()
+        predictions = 0
+        
+>>>>>>> Multi-task
         with torch.no_grad():
             for idx, batch in enumerate(dataloader):
                 if num_samples and predictions >= num_samples:
                     break
+<<<<<<< HEAD
 
                 images = batch['image'].to(device)
                 _ = model(images)
@@ -196,6 +219,20 @@ class CarbonAwareTrainer:
         time_per_prediction = inference_time / predictions
         emissions_per_prediction = emissions / predictions
 
+=======
+                
+                images = batch['image'].to(device)
+                _ = model(images)
+                predictions += images.size(0)
+        
+        inference_time = time.time() - start_time
+        emissions = self.tracker.stop()
+        
+        # Calculate per-prediction metrics
+        time_per_prediction = inference_time / predictions
+        emissions_per_prediction = emissions / predictions
+        
+>>>>>>> Multi-task
         self.inference_emissions.append({
             'phase': 'inference',
             'total_emissions_kg_co2eq': emissions,
@@ -204,7 +241,11 @@ class CarbonAwareTrainer:
             'time_per_prediction_ms': time_per_prediction * 1000,
             'throughput_images_per_sec': predictions / inference_time
         })
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> Multi-task
         print(f"\n{'='*60}")
         print(f"[EARTH] Inference Carbon Footprint")
         print(f"{'='*60}")
@@ -214,7 +255,11 @@ class CarbonAwareTrainer:
         print(f"Inference Time: {time_per_prediction*1000:.2f} ms per image")
         print(f"Throughput: {predictions/inference_time:.1f} images/sec")
         print(f"{'='*60}\n")
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> Multi-task
         return emissions
     
     def save_detailed_report(self, filename="carbon_report.json"):

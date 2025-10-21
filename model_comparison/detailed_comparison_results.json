@@ -1,0 +1,125 @@
+[
+  {
+    "architecture": "resnet34",
+    "backbone_name": "resnet34",
+    "description": "ResNet-34 - Classic CNN baseline",
+    "use_case": "Traditional CNN baseline",
+    "parameters_millions": 27.980971,
+    "flops_billions": 22.972622784,
+    "model_size_mb": 106.82458877563477,
+    "best_val_loss": 1.0147750997543334,
+    "best_val_iou": 0.5191489690216258,
+    "final_bleaching_mae": 0.16835363268852233,
+    "final_bleaching_acc": 0.43666666746139526,
+    "training_emissions_kg_co2": 0.1375,
+    "training_duration_hours": 1.58,
+    "has_training_carbon_data": true,
+    "inference_emissions_g_co2_per_image": 1.1820344403943899,
+    "inference_latency_ms": 15.34454345703125,
+    "history": {},
+    "efficiency_metrics": {
+      "flops": 22972622784.0,
+      "flops_billions": 22.972622784,
+      "params": 27980971.0,
+      "params_millions": 27.980971,
+      "avg_latency_ms": 15.34454345703125,
+      "throughput_fps": 65.16974602732643,
+      "model_size_mb": 106.82458877563477,
+      "efficiency_score": 37.656138493612815
+    },
+    "carbon_report": {
+      "training": {
+        "total_emissions_kg_co2eq": 0.1375,
+        "duration_hours": 1.58,
+        "note": "Using known training data"
+      },
+      "inference": {
+        "emissions_per_prediction_g": 1.1820344403943899,
+        "total_predictions": 99
+      }
+    },
+    "is_pretrained": true
+  },
+  {
+    "architecture": "efficientnet_b0",
+    "backbone_name": "tf_efficientnet_b0_ns",
+    "description": "EfficientNet-B0 - Lightweight baseline",
+    "use_case": "Simple baseline",
+    "parameters_millions": 8.574439,
+    "flops_billions": 4.646697216,
+    "model_size_mb": 33.12637710571289,
+    "best_val_loss": 1.0154506516456605,
+    "best_val_iou": 0.5059766185283661,
+    "final_bleaching_mae": 0.15962885826826095,
+    "final_bleaching_acc": 0.48666666746139525,
+    "training_emissions_kg_co2": 0.1558,
+    "training_duration_hours": 1.77,
+    "has_training_carbon_data": true,
+    "inference_emissions_g_co2_per_image": 0.9682655821535244,
+    "inference_latency_ms": 19.0838360786438,
+    "history": {},
+    "efficiency_metrics": {
+      "flops": 4646697216.0,
+      "flops_billions": 4.646697216,
+      "params": 8574439.0,
+      "params_millions": 8.574439,
+      "avg_latency_ms": 19.0838360786438,
+      "throughput_fps": 52.40036625126291,
+      "model_size_mb": 33.12637710571289,
+      "efficiency_score": 2.937541381584759
+    },
+    "carbon_report": {
+      "training": {
+        "total_emissions_kg_co2eq": 0.1558,
+        "duration_hours": 1.77,
+        "note": "Using known training data"
+      },
+      "inference": {
+        "emissions_per_prediction_g": 0.9682655821535244,
+        "total_predictions": 99
+      }
+    },
+    "is_pretrained": true
+  },
+  {
+    "architecture": "efficientnet_b2",
+    "backbone_name": "tf_efficientnet_b2_ns",
+    "description": "EfficientNet-B2 - Your improved model",
+    "use_case": "Your optimized solution with ASPP & CBAM",
+    "parameters_millions": 12.406077,
+    "flops_billions": 6.134469344,
+    "model_size_mb": 47.943843841552734,
+    "best_val_loss": 0.8832492065429688,
+    "best_val_iou": 0.5715388438105583,
+    "final_bleaching_mae": 0.10921549811959266,
+    "final_bleaching_acc": 0.5966666674613953,
+    "training_emissions_kg_co2": 0.12,
+    "training_duration_hours": 1.4,
+    "has_training_carbon_data": true,
+    "inference_emissions_g_co2_per_image": 1.0964123592543589,
+    "inference_latency_ms": 24.52230453491211,
+    "history": {},
+    "efficiency_metrics": {
+      "flops": 6134469344.0,
+      "flops_billions": 6.134469344,
+      "params": 12406077.0,
+      "params_millions": 12.406077,
+      "avg_latency_ms": 24.52230453491211,
+      "throughput_fps": 40.779201586715146,
+      "model_size_mb": 47.943843841552734,
+      "efficiency_score": 7.212255974509864
+    },
+    "carbon_report": {
+      "training": {
+        "total_emissions_kg_co2eq": 0.12,
+        "duration_hours": 1.4,
+        "note": "Using known training data"
+      },
+      "inference": {
+        "emissions_per_prediction_g": 1.0964123592543589,
+        "total_predictions": 99
+      }
+    },
+    "is_pretrained": true
+  }
+]
