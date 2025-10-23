@@ -2,7 +2,7 @@
 
 ## Overview
 
-This project implements an AI-powered coral bleaching detection system using deep learning, with integrated carbon emission tracking to evaluate environmental sustainability. The system addresses coral reef conservation through automated image analysis while maintaining awareness of its computational environmental costs.
+This implements an AI-powered coral bleaching detection system using deep learning, with integrated carbon emission tracking to evaluate environmental sustainability. The system addresses coral reef conservation through automated image analysis while maintaining awareness of its computational environmental costs.
 
 **Key Features:**
 - **Semantic Segmentation**: Pixel-wise classification (background, healthy coral, bleached coral)

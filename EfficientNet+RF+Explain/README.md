@@ -2,7 +2,7 @@
 
 ## 1. Introduction and Overview
 
-This approach provides a machine learning pipeline for automated classification of coral bleaching in underwater imagery at the pixel level. The software addresses the challenge of efficiently monitoring coral reef health by automating the detection and classification of bleached versus healthy coral.
+This step provides a machine learning pipeline for automated classification of coral bleaching in underwater imagery at the pixel level. 
 
 **Key Features:**
 - Two-stage pipeline combining segmentation and classification

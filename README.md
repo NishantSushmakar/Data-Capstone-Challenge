@@ -2,9 +2,19 @@
 
 ## Overview
 
-This repository contains two complementary approaches for automated coral bleaching detection in underwater imagery. Each approach addresses different aspects of coral reef health monitoring and is maintained in its own directory with detailed documentation.
+Coral bleaching is a critical indicator of reef health, but traditional monitoring through manual surveys is time-consuming and limited in scale. This project provides a **two-step machine learning pipeline** for automated coral bleaching detection from underwater imagery, enabling rapid assessment of reef health across large areas.
 
-### Approach 1: Deep Learning (EfficientNet + Carbon Tracking)
+**Key Features:**
+- Automated coral segmentation and pixel-level classification
+- Interpretable predictions with LIME explanations
+- Carbon footprint monitoring
+- Scalable from single images to large-scale reef surveys
+
+---
+
+## 🔄 Two-Step Pipeline
+
+### Step 1: Semantic Segmentation with Carbon Tracking
 **📁 `EfficientNet+Carbon_tracking+Comparison/`**
 
 Production-ready semantic segmentation with environmental impact tracking.
@@ -17,7 +27,7 @@ Production-ready semantic segmentation with environmental impact tracking.
 
 ---
 
-### Approach 2: Random Forest + Explainable AI
+### Step 2: Random Forest + Explainable AI
 **📁 `EfficientNet+RF+Explain/`**
 
 Interpretable pixel-level classification with LIME explanations.
@@ -30,20 +40,6 @@ Interpretable pixel-level classification with LIME explanations.
 
 ---
 
-## Quick Comparison
-
-| Feature | Deep Learning | Random Forest |
-|---------|--------------|---------------|
-| **Speed** | Fast (GPU) | Moderate (CPU) |
-| **Output** | Segmentation + metrics | Classifications + explanations |
-| **Interpretability** | Limited | High (LIME + LLM) |
-| **GPU Required** | Yes (training) | No |
-| **Carbon Tracking** | ✅ | ❌ |
-| **Explainability** | ❌ | ✅ |
-
-
----
-
 ## Installation
 
 ```bash
@@ -51,16 +47,16 @@ Interpretable pixel-level classification with LIME explanations.
 git clone https://github.com/YourUsername/Data-Capstone-Challenge.git
 cd Data-Capstone-Challenge
 
-# Choose your approach and follow its README:
-cd EfficientNet+Carbon_tracking+Comparison/  # OR
+# If you want to create segmentation maps and track carbon footprint
+cd EfficientNet+Carbon_tracking+Comparison/  
+
+# If you want to classify using Random Forest with explainability
 cd EfficientNet+RF+Explain/
 ```
 
 ---
 
 ## Dataset Structure
-
-Both approaches expect:
 
 ```
 data/
@@ -74,8 +70,8 @@ data/
 ## Documentation
 
 Each approach has its own detailed README.To easily understand and implement, please follow:
-- **Approach 1 (Deep Learning)**: [EfficientNet+Carbon_tracking+Comparison/README.md](./EfficientNet+Carbon_tracking+Comparison/README.md)
-- **Approach 2 (Random Forest)**: [EfficientNet+RF+Explain/README.md](./EfficientNet+RF+Explain/README.md)
+- **Step 1 (Deep Learning)**: [EfficientNet+Carbon_tracking+Comparison/README.md](./EfficientNet+Carbon_tracking+Comparison/README.md)
+- **Step 2 (Random Forest)**: [EfficientNet+RF+Explain/README.md](./EfficientNet+RF+Explain/README.md)
 
 ---
 
